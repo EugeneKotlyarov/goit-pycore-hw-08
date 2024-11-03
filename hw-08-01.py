@@ -30,7 +30,7 @@ Welcome! Assistant bot's commands menu:
 #
 # mainly prints copied from the task, added a couple other for better visualisation
 # of result
-#
+# all
 ################# homework 07 below
 #
 # class Birthday added with ValueError exception detection
@@ -48,7 +48,9 @@ Welcome! Assistant bot's commands menu:
 #
 ################# UPDATE homework 08 below
 #
-# added realisatin for save and load address book state with pickle
+# errors checks fixed/ Changed from "return" to "print" directly
+# added realisation for save and load address book state with pickle
+#
 
 
 class PhoneNumberDoesNotExist(Exception):
@@ -87,9 +89,7 @@ class Birthday(Field):
             bd = dt.strptime(bday, "%d.%m.%Y")
             super().__init__(bd)
         except ValueError:
-            raise ValueError(
-                "Invalid date format fo Birthday value, please use format: DD.MM.YYYY"
-            )
+            raise ValueError
 
 
 class Record:
@@ -220,21 +220,30 @@ def input_error(func):
         except ValueError:
             match func.__name__:
                 case "add_contact":
-                    return f"{COLOR_ERROR}Give me name and phone please"
+                    print(f"{COLOR_ERROR}Give me name and phone please")
                 case "change_contact":
-                    return f"{COLOR_ERROR}Give me name and it's new phone please"
+                    print(
+                        f"{COLOR_ERROR}Give me name, old and new phone for contact please"
+                    )
+                case "phone":
+                    print(f"{COLOR_ERROR}Give me name to search")
+                case "add_birthday":
+                    print(
+                        f"{COLOR_ERROR}Invalid date format for Birthday value, please use format: DD.MM.YYYY"
+                    )
+                case "show_birthday":
+                    print(f"{COLOR_ERROR}Give me name to search for a birthday data")
 
         except KeyError:
             match func.__name__:
                 case "change_contact":
-                    return f'{COLOR_ERROR}Contact WAS NOT found. Nothing to change. Use "add" command to create one'
+                    print(
+                        f'{COLOR_ERROR}Contact WAS NOT found. Nothing to change. Use "add" command to create one'
+                    )
                 case "phone":
-                    return f'{COLOR_ERROR}Contact WAS NOT found. Please use "add" command to create one'
-
-        except IndexError:
-            match func.__name__:
-                case "phone":
-                    return f"{COLOR_ERROR}Give me name to search"
+                    print(
+                        f'{COLOR_ERROR}Contact WAS NOT found. Please use "add" command to create one'
+                    )
 
         except AttributeError:
             match func.__name__:
@@ -242,7 +251,9 @@ def input_error(func):
                     print(f"{COLOR_ERROR}No one record has a birthday value")
 
         except AlreadyExistsError:
-            return f'{COLOR_ERROR}Contact WAS NOT added. Already exists. Please use "change" command for edit'
+            print(
+                f'{COLOR_ERROR}Contact WAS NOT added. Already exists. Please use "change" command for edit'
+            )
 
     return inner
 
@@ -291,7 +302,10 @@ def add_birthday(args, book: AddressBook):
 def show_birthday(args, book: AddressBook):
     name, *_ = args
     record = book.find(name)
-    print(f"{name}'s birthday: {record.birthday}")
+    if record.birthday == None:
+        print(f"{name}'s birthday date does not set")
+    else:
+        print(f"{name}'s birthday is {record.birthday}")
 
 
 @input_error
